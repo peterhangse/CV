@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tack! - Peter Hang</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .thanks-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .thanks-card {
+            max-width: 600px;
+            background: var(--card);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+        }
+        .thanks-card h1 {
+            color: var(--accent);
+            margin-bottom: 20px;
+        }
+        .thanks-card p {
+            color: var(--muted);
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+        .back-button {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity var(--transition);
+        }
+        .back-button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="thanks-container">
+        <div class="thanks-card">
+            <h1>Tack för ditt meddelande! ✉️</h1>
+            <p>Ditt meddelande har skickats. Jag återkommer så snart som möjligt.</p>
+            <p>Ha en fortsatt bra dag!</p>
+            <a href="index.html" class="back-button">Tillbaka till CV</a>
+        </div>
+    </div>
+</body>
+</html>
