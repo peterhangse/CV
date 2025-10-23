@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peter Hang - CV</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="draggable" id="header">
+            <div class="drag-handle">⋮⋮</div>
+            <h1>Peter Hang</h1>
+            <p class="tagline">Lokalreporter & journalist</p>
+            <div class="contact-info">
+                <span>📧 peterdouglashang@gmail.com</span>
+            </div>
+        </header>
+
+        <!-- Om mig -->
+        <section class="card draggable" id="about">
+            <div class="drag-handle">⋮⋮</div>
+            <h2>Om mig</h2>
+            <p>Jag är lokaljournalist med erfarenhet av nyhets- och grävreportage, TV-research och webbpublicering. Jag brinner för lokalpolitik, samhällsfrågor och berättelser som påverkar människors vardag.</p>
+        </section>
+
+        <!-- Erfarenhet -->
+        <section class="card draggable" id="experience">
+            <div class="drag-handle">⋮⋮</div>
+            <h2>Erfarenhet</h2>
+
+            <div class="experience-item">
+                <h3>Kommunreporter — Blekinge Läns Tidning</h3>
+                <p class="meta">jan 2024 – nu | Karlshamn kommun</p>
+                <ul>
+                    <li>Bevakar kommun och närsamhälle: reportage, intervjuer och gräv.</li>
+                    <li>Eget gräv som uppmärksammats av SR och SVT.</li>
+                </ul>
+            </div>
+
+            <div class="experience-item">
+                <h3>Nattreporter — Gota Media</h3>
+                <p class="meta">sep 2022 – jan 2024 | Lund</p>
+                <ul>
+                    <li>Självständigt ansvar för nyhetsbevakning, publicering och webbning för flera titlar.</li>
+                </ul>
+            </div>
+
+            <div class="experience-item">
+                <h3>Researcher — SVT Morgonstudion (praktik)</h3>
+                <p class="meta">jan 2023 – jun 2023 | Stockholm</p>
+                <ul>
+                    <li>Research, förintervjuer och manusstöd inför inslag. Erfarenhet av live-TV.</li>
+                </ul>
+            </div>
+
+            <div class="experience-item">
+                <h3>Organisationssekreterare — Ung Vänster</h3>
+                <p class="meta">maj 2018 – maj 2020 | Stockholm</p>
+                <ul>
+                    <li>Pressekreterare, medierelationer och ansvar för sociala medier och publicering.</li>
+                </ul>
+            </div>
+
+            <div class="experience-item">
+                <h3>Anläggningsunderhåll — Borås Stad</h3>
+                <p class="meta">sommarsäsongsarbete 2010–2022 | Borås</p>
+                <ul>
+                    <li>Evenemangsarbete och underhåll, exempelvis arbete på Borås Arena.</li>
+                </ul>
+            </div>
+
+            <div class="experience-item">
+                <h3>Källarmästare & projektledare — Kristianstads Nation</h3>
+                <p class="meta">2017 – 2018 | Lund</p>
+                <ul>
+                    <li>Startade och ansvarade för Nations ölmässa: planering, tillstånd, marknadsföring och drift.</li>
+                </ul>
+            </div>
+
+        </section>
+
+        <!-- Publicerade artiklar -->
+        <section class="card draggable" id="articles">
+            <div class="drag-handle">⋮⋮</div>
+            <h2>Publicerade artiklar</h2>
+            <div class="article-item">
+                <h3>Personporträtt: Joplin, 23</h3>
+                <p class="meta">Publicerad: 2024</p>
+                <p>Personporträtt som fick god spridning.</p>
+            </div>
+            <div class="article-item">
+                <h3>Granskning: Reservkraft i kommunens mataffärer</h3>
+                <p class="meta">Publicerad: 2024</p>
+                <p>Eget gräv som plockades upp av SR och SVT.</p>
+            </div>
+            <div class="article-item">
+                <h3>Reportage: Blekingehamn växer snabbt</h3>
+                <p class="meta">Publicerad: 2024</p>
+                <p>Större reportage om lokal företagsutveckling.</p>
+            </div>
+        </section>
+
+        <!-- Kompetenser -->
+        <section class="card draggable" id="skills">
+            <div class="drag-handle">⋮⋮</div>
+            <h2>Kompetenser</h2>
+            <div class="skills-grid">
+                <span class="skill-tag">Grävande journalistik</span>
+                <span class="skill-tag">Feature-reportage</span>
+                <span class="skill-tag">Nyhetsbevakning</span>
+                <span class="skill-tag">Intervjuer</span>
+                <span class="skill-tag">Webbpublicering (WordPress)</span>
+                <span class="skill-tag">Digital bildbehandling</span>
+                <span class="skill-tag">Filmredigering</span>
+                <span class="skill-tag">Sociala medier</span>
+            </div>
+        </section>
+
+        <!-- Kontakt -->
+        <section class="card contact-card draggable" id="contact">
+            <div class="drag-handle">⋮⋮</div>
+            <h2>Kontakta mig</h2>
+            <p>Tips på nyhet eller samarbete? Skicka ett meddelande!</p>
+            <form id="contactForm" action="https://formsubmit.co/peterdouglashang@gmail.com" method="POST">
+                <input type="hidden" name="_subject" value="Nytt meddelande från CV-sidan">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_next" value="https://peterhangse.github.io/CV/thanks.html">
+
+                <div class="form-group">
+                    <label for="name">Namn</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">E-post</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="message">Meddelande</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+
+                <button type="submit" class="cta-button">Skicka meddelande</button>
+            </form>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2025 Peter Hang. Alla rättigheter förbehållna.</p>
+            <p class="footer-note">Dra i valfri sektion för att ändra ordning.</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
