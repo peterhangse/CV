@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Peter Hang - Journalist CV</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header Section -->
+        <header class="draggable" id="header">
+            <div class="drag-handle">⋮⋮</div>
+            <h1>Peter Hang</h1>
+            <p class="tagline">Local Journalist & Writer</p>
+            <div class="contact-info">
+                <span>📧 peterdouglashang@gmail.com</span>
+            </div>
+        </header>
+
+        <!-- About Section -->
+        <section class="card draggable" id="about">
+            <div class="drag-handle">⋮⋮</div>
+            <h2>About Me</h2>
+            <p>As a dedicated local journalist, I am passionate about telling the stories that matter to our community. With a keen eye for detail and a commitment to truth, I bring clarity to complex issues and give voice to those who need to be heard.</p>
+        </section>
+
+        <!-- Experience Section -->
+        <section class="card draggable" id="experience">
+            <div class="drag-handle">⋮⋮</div>
+            <h2>Experience</h2>
+            <div class="experience-item">
+                <h3>Senior Local Reporter</h3>
+                <p class="meta">2020 - Present</p>
+                <ul>
+                    <li>Investigative reporting on local government and community issues</li>
+                    <li>Feature articles covering cultural events and human interest stories</li>
+                    <li>Breaking news coverage and real-time reporting</li>
+                </ul>
+            </div>
+            <div class="experience-item">
+                <h3>Staff Writer</h3>
+                <p class="meta">2017 - 2020</p>
+                <ul>
+                    <li>General assignment reporting</li>
+                    <li>Local politics and municipal affairs coverage</li>
+                    <li>Community engagement and event reporting</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Articles Section -->
+        <section class="card draggable" id="articles">
+            <div class="drag-handle">⋮⋮</div>
+            <h2>Featured Articles</h2>
+            <div class="article-item">
+                <h3>The Voice of Our Community</h3>
+                <p class="meta">Published: 2024</p>
+                <p>An in-depth look at how local voices shape regional policy and decision-making.</p>
+            </div>
+            <div class="article-item">
+                <h3>Behind the Headlines</h3>
+                <p class="meta">Published: 2023</p>
+                <p>Investigative series uncovering the stories behind the news that affects our daily lives.</p>
+            </div>
+            <div class="article-item">
+                <h3>Cultural Crossroads</h3>
+                <p class="meta">Published: 2023</p>
+                <p>A celebration of local arts, culture, and the people who make our community vibrant.</p>
+            </div>
+        </section>
+
+        <!-- Skills Section -->
+        <section class="card draggable" id="skills">
+            <div class="drag-handle">⋮⋮</div>
+            <h2>Skills & Expertise</h2>
+            <div class="skills-grid">
+                <span class="skill-tag">Investigative Journalism</span>
+                <span class="skill-tag">Feature Writing</span>
+                <span class="skill-tag">Breaking News</span>
+                <span class="skill-tag">Interview Techniques</span>
+                <span class="skill-tag">Fact-Checking</span>
+                <span class="skill-tag">Digital Media</span>
+                <span class="skill-tag">Social Media</span>
+                <span class="skill-tag">Photography</span>
+            </div>
+        </section>
+
+        <!-- Contact Form Section -->
+        <section class="card contact-card draggable" id="contact">
+            <div class="drag-handle">⋮⋮</div>
+            <h2>Get In Touch</h2>
+            <p>Have a story tip or want to collaborate? Send me a message!</p>
+            <form id="contactForm" action="https://formsubmit.co/peterdouglashang@gmail.com" method="POST">
+                <input type="hidden" name="_subject" value="New message from CV website">
+                <input type="hidden" name="_captcha" value="false">
+                <input type="hidden" name="_next" value="https://peterhangse.github.io/CV/thanks.html">
+                
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="message">Message</label>
+                    <textarea id="message" name="message" rows="5" required></textarea>
+                </div>
+                
+                <button type="submit" class="cta-button">Send Message</button>
+            </form>
+        </section>
+
+        <!-- Footer -->
+        <footer>
+            <p>&copy; 2025 Peter Hang. All rights reserved.</p>
+            <p class="footer-note">Drag any section to reposition it!</p>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
