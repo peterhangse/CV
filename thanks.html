@@ -3,103 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thank You - Peter Hang</title>
+    <title>Tack! - Peter Hang</title>
+    <link rel="stylesheet" href="styles.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .thanks-container {
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-        }
-
-        .thank-you-container {
-            background: white;
-            padding: 60px 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
             text-align: center;
+        }
+        .thanks-card {
             max-width: 600px;
-            animation: fadeIn 0.6s ease-out;
+            background: var(--card);
+            padding: 40px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
         }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .checkmark {
-            font-size: 80px;
-            color: #28a745;
+        .thanks-card h1 {
+            color: var(--accent);
             margin-bottom: 20px;
-            animation: scaleIn 0.5s ease-out 0.2s backwards;
         }
-
-        @keyframes scaleIn {
-            from {
-                transform: scale(0);
-            }
-            to {
-                transform: scale(1);
-            }
-        }
-
-        h1 {
-            color: #2c3e50;
-            font-size: 2.5em;
-            margin-bottom: 20px;
-            font-weight: 300;
-        }
-
-        p {
-            color: #666;
-            font-size: 1.2em;
-            line-height: 1.6;
+        .thanks-card p {
+            color: var(--muted);
             margin-bottom: 30px;
+            line-height: 1.6;
         }
-
         .back-button {
             display: inline-block;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 15px 40px;
+            background: var(--accent);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
             text-decoration: none;
-            border-radius: 5px;
-            font-size: 1.1em;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+            font-weight: 600;
+            transition: opacity var(--transition);
         }
-
         .back-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
-        }
-
-        .back-button:active {
-            transform: translateY(0);
+            opacity: 0.9;
         }
     </style>
 </head>
 <body>
-    <div class="thank-you-container">
-        <div class="checkmark">✓</div>
-        <h1>Thank You!</h1>
-        <p>Your message has been successfully sent. I appreciate you reaching out and will get back to you as soon as possible.</p>
-        <a href="index.html" class="back-button">Back to CV</a>
+    <div class="thanks-container">
+        <div class="thanks-card">
+            <h1>Tack för ditt meddelande! ✉️</h1>
+            <p>Ditt meddelande har skickats. Jag återkommer så snart som möjligt.</p>
+            <p>Ha en fortsatt bra dag!</p>
+            <a href="index.html" class="back-button">Tillbaka till CV</a>
+        </div>
     </div>
 </body>
 </html>
