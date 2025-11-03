@@ -6,7 +6,9 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--primary);padding:20px}
 .container{max-width:900px;margin:0 auto}
-header{background:linear-gradient(90deg,var(--accent),#764ba2);color:#fff;padding:36px;border-radius:var(--radius);box-shadow:var(--shadow);text-align:center;margin-bottom:20px}
+header{background:linear-gradient(90deg,var(--accent),#764ba2);color:#fff;padding:36px;border-radius:var(--radius);box-shadow:var(--shadow);text-align:center;margin-bottom:20px;display:flex;align-items:center;gap:20px}
+.header-profile-image{width:100px;height:100px;border-radius:50%;object-fit:cover;box-shadow:var(--shadow)}
+.header-content{flex:1;text-align:center}
 header h1{font-weight:600;letter-spacing:1px}
 .tagline{opacity:.95;margin-top:6px;font-weight:300}
 .card{background:var(--card);padding:22px;border-radius:var(--radius);box-shadow:var(--shadow);margin-bottom:18px;position:relative;transition:transform var(--transition),box-shadow var(--transition)}
@@ -38,9 +40,9 @@ footer{text-align:center;color:var(--muted);font-size:.95em;margin-top:8px}
 
 /* Responsiv */
 @media (max-width:720px){
-  header{padding:24px}
+  header{padding:24px;flex-direction:column;text-align:center}
+  .header-profile-image{width:80px;height:80px}
   .card{padding:16px}
   .skills-grid{gap:6px}
-  .profile-image{width:120px;height:120px;margin:0 0 10px 15px}
   .programs-grid{grid-template-columns:1fr;gap:12px}
 }
