@@ -1,7 +1,7 @@
 :root{
   --bg:#f5f6fb;--card:#fff;--primary:#2c3e50;--accent:#667eea;--muted:#6b7280;
   --radius:10px;--shadow:0 6px 18px rgba(0,0,0,.08);--transition:.25s;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: Georgia, "Times New Roman", Times, serif;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--primary);padding:20px}
