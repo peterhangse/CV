@@ -37,6 +37,14 @@ input,textarea{width:100%;padding:10px;border-radius:6px;border:1px solid #e6e8f
 .cta-button:hover{opacity:.95}
 footer{text-align:center;color:var(--muted);font-size:.95em;margin-top:8px}
 
+/* Program pages */
+.program-container{min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center}
+.program-card{max-width:600px;background:var(--card);padding:40px;border-radius:var(--radius);box-shadow:var(--shadow)}
+.program-card h1{color:var(--accent);margin-bottom:20px}
+.program-card p{color:var(--muted);margin-bottom:30px;line-height:1.6;font-size:1.1em}
+.back-button{display:inline-block;background:var(--accent);color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;transition:opacity var(--transition)}
+.back-button:hover{opacity:.9}
+
 /* Responsiv */
 @media (max-width:720px){
   header{padding:24px;flex-direction:column;text-align:center}
