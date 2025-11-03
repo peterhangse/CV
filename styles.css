@@ -24,7 +24,6 @@ h2{color:var(--primary);margin-bottom:10px}
 .article-item h3 a:hover{color:var(--accent);text-decoration:underline}
 .skills-grid{display:flex;flex-wrap:wrap;gap:8px}
 .skill-tag{background:var(--accent);color:#fff;padding:6px 12px;border-radius:999px;font-size:.9em}
-.profile-image{width:150px;height:150px;border-radius:50%;object-fit:cover;float:right;margin:0 0 10px 20px;box-shadow:var(--shadow)}
 .programs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:12px}
 .program-box{display:block;background:#f8f9fa;padding:20px;border-radius:8px;text-align:center;text-decoration:none;color:var(--primary);border:2px solid #e6e8f0;transition:all var(--transition);cursor:pointer}
 .program-box:hover{border-color:var(--accent);box-shadow:0 4px 12px rgba(102,126,234,.2);transform:translateY(-2px)}
