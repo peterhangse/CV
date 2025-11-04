@@ -6,7 +6,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--primary);padding:20px}
 .container{max-width:900px;margin:0 auto}
-header{background:linear-gradient(90deg,var(--accent),#764ba2);color:#fff;padding:36px;border-radius:var(--radius);box-shadow:var(--shadow);text-align:center;margin-bottom:20px;display:flex;align-items:center;gap:20px}
+header{background:linear-gradient(90deg,#3b82f6,#1e40af);color:#fff;padding:36px;border-radius:var(--radius);box-shadow:var(--shadow);text-align:center;margin-bottom:20px;display:flex;align-items:center;gap:20px}
 .header-profile-image{width:140px;height:140px;border-radius:50%;object-fit:cover;box-shadow:var(--shadow)}
 .header-content{flex:1;text-align:center}
 header h1{font-weight:600;letter-spacing:1px}
