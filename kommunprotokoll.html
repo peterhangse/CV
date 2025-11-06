@@ -5,14 +5,974 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kommunprotokollsbevakare - Peter Hang</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .code-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+        .code-header {
+            background: var(--card);
+            padding: 30px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .code-header h1 {
+            color: var(--accent);
+            margin-bottom: 15px;
+        }
+        .code-header p {
+            color: var(--muted);
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+        .code-box {
+            background: #1e1e1e;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+        }
+        .code-toolbar {
+            background: #2d2d2d;
+            padding: 12px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #3d3d3d;
+        }
+        .code-filename {
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
+        .copy-button {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85em;
+            transition: opacity var(--transition);
+        }
+        .copy-button:hover {
+            opacity: 0.9;
+        }
+        .code-content {
+            padding: 20px;
+            overflow-x: auto;
+        }
+        .code-content pre {
+            margin: 0;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.5;
+            color: #d4d4d4;
+        }
+        .back-button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+        .back-button {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity var(--transition);
+        }
+        .back-button:hover {
+            opacity: 0.9;
+        }
+        @media (max-width: 720px) {
+            .code-container {
+                padding: 10px;
+            }
+            .code-content {
+                padding: 10px;
+            }
+            .code-content pre {
+                font-size: 0.75em;
+            }
+        }
+    </style>
 </head>
 <body>
-    <div class="program-container">
-        <div class="program-card">
+    <div class="code-container">
+        <div class="code-header">
             <h1>Kommunprotokollsbevakare</h1>
-            <p>Här kommer snart program finnas</p>
+            <p>Karlshamn Monitor - Ett Streamlit-baserat övervakningssystem som bevakar Karlshamns kommun för nya protokoll och dokument via DocumentWeb API.</p>
+        </div>
+        
+        <div class="code-box">
+            <div class="code-toolbar">
+                <span class="code-filename">karlshamn_monitor.py</span>
+                <button class="copy-button" onclick="copyCode()">📋 Kopiera kod</button>
+            </div>
+            <div class="code-content">
+                <pre id="pythonCode">"""
+Karlshamn Monitor - Streamlit GUI
+Övervakar Karlshamns kommun för nya protokoll/dokument via DocumentWeb API
+"""
+import streamlit as st
+import sqlite3
+import time
+from datetime import datetime
+import threading
+import os
+import smtplib
+from typing import Dict, List
+
+import requests
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+
+from karlshamn_alerter import (
+    COMMITTEES,
+    fetch_protocols,
+    init_db as cli_init_db,
+    build_message,
+)
+
+DB_FILE = os.path.join(os.path.dirname(__file__), "..", "alerter.db")
+
+# ============================================================================
+# DATABASE FUNCTIONS
+# ============================================================================
+def init_db():
+    """Initierar databasen med samma schema som CLI-alertern."""
+    cli_init_db(DB_FILE)
+
+def get_all_items():
+    """Hämtar alla sparade items från databasen"""
+    con = sqlite3.connect(DB_FILE)
+    try:
+        cur = con.execute("""
+            SELECT url, title, first_seen, committee
+            FROM items 
+            ORDER BY first_seen DESC
+        """)
+        items = []
+        for row in cur.fetchall():
+            items.append({
+                'url': row[0],
+                'title': row[1],
+                'first_seen': datetime.fromtimestamp(row[2]).strftime('%Y-%m-%d %H:%M:%S'),
+                'committee': row[3] if row[3] else 'Okänd'
+            })
+        return items
+    finally:
+        con.close()
+
+def already_seen(url):
+    """Kollar om URL redan finns i databasen"""
+    con = sqlite3.connect(DB_FILE)
+    try:
+        cur = con.execute("SELECT 1 FROM items WHERE url = ?", (url,))
+        return cur.fetchone() is not None
+    finally:
+        con.close()
+
+def mark_seen(url, title, committee):
+    """Markerar URL som sedd"""
+    con = sqlite3.connect(DB_FILE)
+    try:
+        con.execute(
+            "INSERT OR IGNORE INTO items (url, title, first_seen, committee) VALUES (?,?,?,?)",
+            (url, title, int(time.time()), committee)
+        )
+        con.commit()
+    finally:
+        con.close()
+
+def clear_database():
+    """Tömmer hela databasen"""
+    con = sqlite3.connect(DB_FILE)
+    try:
+        con.execute("DELETE FROM items")
+        con.commit()
+    finally:
+        con.close()
+
+# ============================================================================
+# API HELPERS
+# ============================================================================
+def check_for_new_items(keywords, selected_committees, include_existing=False):
+    """Hämtar dokument via DocumentWeb API och returnerar matchningar."""
+    keyword_terms = [term.lower() for term in keywords if term]
+    chosen_committees = selected_committees or [c["name"] for c in COMMITTEES]
+    committee_lookup = {c["name"]: c for c in COMMITTEES}
+
+    hits = []
+    for committee_name in chosen_committees:
+        committee = committee_lookup.get(committee_name)
+        if not committee:
+            continue
+        try:
+            documents = list(fetch_protocols(committee["api_url"]))
+        except Exception as exc:
+            st.error(f"API-fel för {committee_name}: {exc}")
+            continue
+
+        for doc in documents:
+            title = doc.get("name", "Okänt dokument")
+            haystack = " ".join([
+                title,
+                (doc.get("responsible") or {}).get("name", ""),
+            ]).lower()
+            if keyword_terms and not any(term in haystack for term in keyword_terms):
+                continue
+
+            document_id = doc.get("id")
+            url = f"{committee['page_url']}#{document_id}" if document_id else committee["page_url"]
+            is_new = not already_seen(url)
+            if is_new:
+                mark_seen(url, title, committee_name)
+
+            if include_existing or is_new:
+                hits.append(
+                    {
+                        "url": url,
+                        "title": title,
+                        "committee": committee_name,
+                        "created": doc.get("createDate", ""),
+                        "responsible": (doc.get("responsible") or {}).get("name"),
+                        "is_new": is_new,
+                        "doc": doc,
+                        "direct_url": doc.get("publicUrl") or doc.get("downloadUrl"),
+                    }
+                )
+
+    return hits
+
+def send_telegram(bot_token, chat_id, message):
+    """Skickar meddelande via Telegram"""
+    try:
+        url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        data = {"chat_id": chat_id, "text": message}
+        resp = requests.post(url, data=data, timeout=10)
+        return resp.status_code == 200
+    except Exception as e:
+        st.error(f"Telegram-fel: {e}")
+        return False
+
+def send_email(smtp_host, smtp_port, smtp_user, smtp_pass, from_email, to_email, subject, body):
+    """Skickar email via SMTP"""
+    try:
+        msg = MIMEMultipart()
+        msg['From'] = from_email
+        msg['To'] = to_email
+        msg['Subject'] = subject
+        msg.attach(MIMEText(body, 'plain', 'utf-8'))
+        
+        with smtplib.SMTP(smtp_host, smtp_port, timeout=10) as server:
+            server.starttls()
+            server.login(smtp_user, smtp_pass)
+            server.send_message(msg)
+        return True
+    except Exception as e:
+        st.error(f"Email-fel: {e}")
+        return False
+
+def notify_new_item(item, telegram_config, email_config):
+    """Skickar notifikationer för nytt dokument."""
+    committee = next((c for c in COMMITTEES if c["name"] == item["committee"]), None)
+    if not committee:
+        return []
+
+    message = build_message(item["doc"], committee)
+    if item.get("direct_url"):
+        message += f"\nDirektlänk: {item['direct_url']}"
+
+    results = []
+
+    if telegram_config['enabled'] and telegram_config['token'] and telegram_config['chat_id']:
+        success = send_telegram(telegram_config['token'], telegram_config['chat_id'], message)
+        results.append(('Telegram', success))
+
+    if email_config['enabled'] and all([
+        email_config['smtp_host'],
+        email_config['smtp_user'],
+        email_config['to_email']
+    ]):
+        success = send_email(
+            email_config['smtp_host'],
+            email_config['smtp_port'],
+            email_config['smtp_user'],
+            email_config['smtp_pass'],
+            email_config['from_email'],
+            email_config['to_email'],
+            f"🔔 Karlshamn Monitor - {item['title']}",
+            message
+        )
+        results.append(('Email', success))
+
+    return results
+
+# ============================================================================
+# WATCH MODE FUNCTIONALITY
+# ============================================================================
+class WatchMonitor:
+    """Hanterar watch-mode i bakgrunden"""
+
+    def __init__(self):
+        self.running = False
+        self.thread = None
+        self.last_check = None
+        self.check_count = 0
+        self.new_items_total = 0
+        self.selected_committees = []
+        self.keywords = []
+
+    def start(self, keywords, committees, interval, telegram_config, email_config):
+        if self.running:
+            return False
+
+        self.running = True
+        self.selected_committees = committees
+        self.keywords = keywords
+        self.thread = threading.Thread(
+            target=self._watch_loop,
+            args=(interval, telegram_config, email_config),
+            daemon=True
+        )
+        self.thread.start()
+        return True
+
+    def stop(self):
+        self.running = False
+        if self.thread:
+            self.thread = None
+
+    def _watch_loop(self, interval, telegram_config, email_config):
+        while self.running:
+            try:
+                self.last_check = datetime.now()
+                self.check_count += 1
+
+                new_items = check_for_new_items(self.keywords, self.selected_committees, include_existing=False)
+
+                for item in new_items:
+                    if item['is_new']:
+                        self.new_items_total += 1
+                        notify_new_item(item, telegram_config, email_config)
+
+            except Exception as e:
+                print(f"Watch error: {e}")
+
+            time.sleep(interval)
+
+# Initialisera watch monitor i session state
+if 'watch_monitor' not in st.session_state:
+    st.session_state.watch_monitor = WatchMonitor()
+
+# ============================================================================
+# STREAMLIT UI
+# ============================================================================
+st.set_page_config(page_title="Karlshamn Monitor", page_icon="🔔", layout="wide")
+
+st.title("🔔 Karlshamn Monitor")
+st.markdown("**Övervakar Karlshamns kommun för nya protokoll och dokument**")
+
+# Initialisera databas
+init_db()
+
+# Sidebar - Konfiguration
+with st.sidebar:
+    st.header("⚙️ Inställningar")
+
+    committee_names = [c["name"] for c in COMMITTEES]
+    selected_committees = st.multiselect(
+        "Nämnder att övervaka",
+        committee_names,
+        default=committee_names,
+    )
+
+    keywords_input = st.text_input(
+        "Nyckelord (kommaseparerade)",
+        value="",
+        help="Filtrera på nyckelord, t.ex: 'protokoll, beslut, sammanträde'"
+    )
+    keywords = [k.strip() for k in keywords_input.split(",") if k.strip()]
+
+    st.markdown("---")
+    st.subheader("📧 Notifikationer")
+
+    enable_telegram = st.checkbox("Aktivera Telegram", value=False)
+    if enable_telegram:
+        telegram_token = st.text_input("Bot Token", type="password", help="Telegram bot token från @BotFather")
+        telegram_chat_id = st.text_input("Chat ID", help="Ditt Telegram chat ID")
+    else:
+        telegram_token = ""
+        telegram_chat_id = ""
+
+    enable_email = st.checkbox("Aktivera Email", value=False)
+    if enable_email:
+        smtp_host = st.text_input("SMTP Server", value="smtp.gmail.com", help="T.ex. smtp.gmail.com för Gmail")
+        smtp_port = st.number_input("SMTP Port", value=587, min_value=1, max_value=65535)
+        smtp_user = st.text_input("Email-adress (från)", help="Din email-adress")
+        smtp_pass = st.text_input("Email-lösenord", type="password", help="App-specifikt lösenord för Gmail")
+        to_email = st.text_input("Skicka till", help="Mottagarens email-adress")
+    else:
+        smtp_host = ""
+        smtp_port = 587
+        smtp_user = ""
+        smtp_pass = ""
+        to_email = ""
+
+    st.markdown("---")
+    st.subheader("🗑️ Databas")
+    if st.button("Rensa databas", type="secondary"):
+        clear_database()
+        st.success("Databas rensad!")
+        st.rerun()
+
+# Huvudinnehåll - Tabs
+tab1, tab2, tab3, tab4 = st.tabs(["📊 Manuell check", "📜 Historik", "🤖 Watch-mode", "⚙️ 24/7 Setup"])
+
+# ============================================================================
+# TAB 1: MANUELL CHECK
+# ============================================================================
+with tab1:
+    st.subheader("Kör manuell kontroll")
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown("**API-källa:** DocumentWeb")
+        st.markdown(f"**Nämnder:** {', '.join(selected_committees) if selected_committees else 'Alla'}")
+        if keywords:
+            st.markdown(f"**Filter:** {', '.join(keywords)}")
+        else:
+            st.markdown("**Filter:** Inga filter (visar alla dokument)")
+    
+    with col2:
+        check_button = st.button("🔍 Kolla nu", type="primary", use_container_width=True)
+    
+    if check_button:
+        with st.spinner("Hämtar protokoll från DocumentWeb..."):
+            hits = check_for_new_items(keywords, selected_committees, include_existing=True)
+
+        if hits:
+            new_items = [item for item in hits if item['is_new']]
+            seen_items = [item for item in hits if not item['is_new']]
+
+            st.success(f"Hittade {len(hits)} dokument som matchar filtret")
+
+            telegram_config = {
+                'enabled': enable_telegram,
+                'token': telegram_token,
+                'chat_id': telegram_chat_id
+            }
+            email_config = {
+                'enabled': enable_email,
+                'smtp_host': smtp_host,
+                'smtp_port': smtp_port,
+                'smtp_user': smtp_user,
+                'smtp_pass': smtp_pass,
+                'from_email': smtp_user,
+                'to_email': to_email
+            }
+
+            if new_items:
+                st.markdown(f"### 🆕 Nya dokument ({len(new_items)})")
+                for item in new_items:
+                    st.markdown(f"**{item['title']}**")
+                    st.caption(item['committee'])
+                    st.markdown(f"🔗 [{item['url']}]({item['url']})")
+                    if item.get('direct_url') and item['direct_url'] != item['url']:
+                        st.markdown(f"📥 [Direktnedladdning]({item['direct_url']})")
+                    if enable_telegram or enable_email:
+                        results = notify_new_item(item, telegram_config, email_config)
+                        if results:
+                            notify_text = " | ".join([f"{service}: {'✅' if success else '❌'}" for service, success in results])
+                            st.caption(f"Notifikationer: {notify_text}")
+                    st.markdown("---")
+
+            if seen_items:
+                with st.expander(f"Redan kända dokument ({len(seen_items)})"):
+                    for item in seen_items:
+                        st.markdown(f"**{item['title']}**")
+                        st.caption(item['committee'])
+                        st.markdown(f"🔗 [{item['url']}]({item['url']})")
+                        if item.get('direct_url') and item['direct_url'] != item['url']:
+                            st.markdown(f"📥 [Direktnedladdning]({item['direct_url']})")
+                        st.markdown("---")
+        else:
+            st.warning("Inga dokument matchade filtret.")
+
+# ============================================================================
+# TAB 2: HISTORIK
+# ============================================================================
+with tab2:
+    st.subheader("Historik över alla sparade items")
+    
+    items = get_all_items()
+    if items:
+        st.markdown(f"**Totalt antal protokoll:** {len(items)}")
+        import pandas as pd
+        df = pd.DataFrame(items)
+        # Gruppera per nämnd
+        for committee, group in df.groupby('committee'):
+            st.subheader(f"🏛️ {committee} ({len(group)})")
+            st.dataframe(
+                group,
+                use_container_width=True,
+                column_config={
+                    "url": st.column_config.LinkColumn("URL"),
+                    "title": "Titel",
+                    "first_seen": "Först sedd",
+                    "committee": "Nämnd"
+                },
+                hide_index=True
+            )
+    else:
+        st.info("Ingen historik ännu. Kör en check först!")
+
+# ============================================================================
+# TAB 3: WATCH MODE
+# ============================================================================
+with tab3:
+    st.subheader("🤖 Automatisk övervakning")
+    
+    # Warning om begränsningar
+    st.warning("""
+    ⚠️ **OBS: Watch-mode i Streamlit har begränsningar**
+    
+    Detta läge kräver att:
+    - Streamlit-appen är öppen i webbläsaren
+    - Browser-tabben inte stängs
+    - Datorn inte går i viloläge
+    
+    **För 24/7-övervakning:** Använd istället **Tab 4: 24/7 Setup** där du konfigurerar CLI-versionen med Windows Task Scheduler. Den körs helt i bakgrunden utan browser!
+    """)
+    
+    st.markdown("---")
+    
+    # Konfigurera watch settings
+    col1, col2 = st.columns(2)
+    with col1:
+        watch_interval = st.number_input(
+            "Intervall (sekunder)",
+            min_value=60,
+            max_value=3600,
+            value=600,
+            step=60,
+            help="Hur ofta ska sidan kollas? (minst 60 sekunder)"
+        )
+    
+    with col2:
+        st.metric("Status", "▶️ Körs" if st.session_state.watch_monitor.running else "⏸️ Stoppad")
+    
+    # Status information
+    if st.session_state.watch_monitor.running:
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("Antal körningar", st.session_state.watch_monitor.check_count)
+        with col2:
+            st.metric("Nya dokument", st.session_state.watch_monitor.new_items_total)
+        with col3:
+            if st.session_state.watch_monitor.last_check:
+                last_check_str = st.session_state.watch_monitor.last_check.strftime('%H:%M:%S')
+                st.metric("Senaste check", last_check_str)
+        st.caption(
+            "Övervakar: "
+            + (
+                ", ".join(st.session_state.watch_monitor.selected_committees)
+                if st.session_state.watch_monitor.selected_committees
+                else "Alla nämnder"
+            )
+        )
+    
+    st.markdown("---")
+    
+    # Start/Stop buttons
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        if st.button("▶️ Starta Watch-mode", type="primary", disabled=st.session_state.watch_monitor.running, use_container_width=True):
+            # Skapa config för notifikationer
+            telegram_config = {
+                'enabled': enable_telegram,
+                'token': telegram_token,
+                'chat_id': telegram_chat_id
+            }
+            email_config = {
+                'enabled': enable_email,
+                'smtp_host': smtp_host,
+                'smtp_port': int(smtp_port),
+                'smtp_user': smtp_user,
+                'smtp_pass': smtp_pass,
+                'from_email': smtp_user,
+                'to_email': to_email
+            }
+            
+            success = st.session_state.watch_monitor.start(
+                keywords,
+                selected_committees,
+                watch_interval,
+                telegram_config,
+                email_config
+            )
+            
+            if success:
+                st.success(f"✅ Watch-mode startad! Kollar var {watch_interval}s.")
+                st.rerun()
+            else:
+                st.error("❌ Kunde inte starta watch-mode")
+    
+    with col2:
+        if st.button("⏹️ Stoppa Watch-mode", type="secondary", disabled=not st.session_state.watch_monitor.running, use_container_width=True):
+            st.session_state.watch_monitor.stop()
+            st.info("⏸️ Watch-mode stoppad")
+            st.rerun()
+    
+    st.markdown("---")
+    st.markdown(
+        """
+    ### ℹ️ Om Watch-mode
+
+    **Hur det fungerar:**
+    - 🔄 Hämtar protokoll via DocumentWeb API med valt intervall
+    - 🔔 Skickar notifikationer när nya dokument hittas (Telegram/Email)
+    - 💾 Sparar alla nya poster i databasen
+    - 🔒 Körs i bakgrunden som en separat tråd
+
+    **Tips:**
+    - Rekommenderat intervall: 10 minuter (600s) eller mer
+    - Aktivera notifikationer i sidomenyn före start
+    - Watch-mode fortsätter köra även om du byter tab
+    - Stoppas automatiskt när du stänger appen
+
+    **Telegram setup:**
+    1. Skapa bot via @BotFather på Telegram
+    2. Kopiera bot token
+    3. Starta en chat med din bot
+    4. Få ditt chat ID från @userinfobot
+
+    **Gmail setup:**
+    1. Använd `smtp.gmail.com` och port `587`
+    2. Skapa ett "App-specifikt lösenord" i Google-kontot
+    3. Använd det lösenordet här (inte ditt vanliga lösenord)
+    """
+    )
+
+    if st.session_state.watch_monitor.running and not (enable_telegram or enable_email):
+        st.warning("⚠️ Watch-mode körs men inga notifikationer är aktiverade!")
+
+# ============================================================================
+# TAB 4: 24/7 SETUP (CLI + TASK SCHEDULER)
+# ============================================================================
+with tab4:
+    st.subheader("⚙️ Setup för 24/7-övervakning")
+    
+    st.markdown("""
+    ### 🎯 Rekommenderad lösning för 24/7-övervakning
+    
+    **Watch-mode i Tab 3** fungerar men har begränsningar:
+    - ⚠️ Kräver att Streamlit-appen är öppen i webbläsaren
+    - ⚠️ Stoppas när du stänger browser-tabben
+    - ⚠️ Lösenord måste anges varje gång
+    
+    **Bättre lösning:** Använd CLI-versionen + Windows Task Scheduler
+    - ✅ Körs helt i bakgrunden (ingen browser behövs)
+    - ✅ Startar automatiskt vid uppstart
+    - ✅ Säkra credentials i `.env`-fil
+    - ✅ Samma databas som Streamlit (du ser historik här)
+    """)
+    
+    st.markdown("---")
+    
+    # .ENV EDITOR
+    st.subheader("📝 Steg 1: Konfigurera .env-fil")
+    
+    env_file_path = os.path.join(os.path.dirname(__file__), "..", "karlshamn_alerter.py")
+    env_dir = os.path.dirname(os.path.abspath(env_file_path))
+    env_path = os.path.join(env_dir, ".env")
+    
+    st.markdown(f"**Plats:** `{env_path}`")
+    
+    # Läs nuvarande .env om den finns
+    current_env = {}
+    if os.path.exists(env_path):
+        try:
+            with open(env_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    if line and not line.startswith('#') and '=' in line:
+                        key, value = line.split('=', 1)
+                        current_env[key.strip()] = value.strip()
+        except Exception as e:
+            st.error(f"Kunde inte läsa .env: {e}")
+    
+    with st.form("env_editor"):
+        st.markdown("**Konfigurera inställningar:**")
+        
+        col1, col2 = st.columns(2)
+        
+        with col1:
+            st.markdown("##### 🌐 API-baserad övervakning")
+            st.info("""
+            ⚡ **Använder DocumentWeb API direkt**
+            
+            Ingen URL-konfiguration behövs längre! API-endpoint är hårdkodad.
+            
+            **Resultat:**
+            - 🎯 7 protokoll (inte 710 slumplänkar)
+            - ⚡ Mycket snabbare
+            - 🔒 Mer pålitlig
+            """)
+            
+            st.markdown("##### 📧 Email (SMTP)")
+            env_smtp_host = st.text_input(
+                "SMTP_HOST",
+                value=current_env.get('SMTP_HOST', 'smtp.gmail.com'),
+                help="SMTP-server"
+            )
+            env_smtp_port = st.text_input(
+                "SMTP_PORT",
+                value=current_env.get('SMTP_PORT', '587'),
+                help="SMTP-port (587 för TLS)"
+            )
+            env_smtp_user = st.text_input(
+                "SMTP_USER",
+                value=current_env.get('SMTP_USER', ''),
+                help="Din email-adress"
+            )
+            env_smtp_pass = st.text_input(
+                "SMTP_PASS",
+                value=current_env.get('SMTP_PASS', ''),
+                type="password",
+                help="App-specifikt lösenord (Gmail)"
+            )
+        
+        with col2:
+            env_from_email = st.text_input(
+                "FROM_EMAIL",
+                value=current_env.get('FROM_EMAIL', current_env.get('SMTP_USER', 'alerter@example.com')),
+                help="Avsändaradress (oftast samma som SMTP_USER)"
+            )
+            env_to_email = st.text_input(
+                "TO_EMAIL",
+                value=current_env.get('TO_EMAIL', ''),
+                help="Mottagaradress (dit notifikationer skickas)"
+            )
+            
+            st.markdown("##### 📱 Telegram (valfritt)")
+            env_telegram_token = st.text_input(
+                "TELEGRAM_BOT_TOKEN",
+                value=current_env.get('TELEGRAM_BOT_TOKEN', ''),
+                type="password",
+                help="Från @BotFather"
+            )
+            env_telegram_chat = st.text_input(
+                "TELEGRAM_CHAT_ID",
+                value=current_env.get('TELEGRAM_CHAT_ID', ''),
+                help="Ditt chat ID (från @userinfobot)"
+            )
+        
+        st.markdown("---")
+        
+        col1, col2 = st.columns([3, 1])
+        with col1:
+            st.caption("💾 Detta sparar credentials säkert i `.env`-fil (ej i versionskontroll)")
+        with col2:
+            save_button = st.form_submit_button("💾 Spara .env", type="primary", use_container_width=True)
+    
+    if save_button:
+        try:
+            env_content = f"""# Karlshamn Alerter Configuration (API Version)
+# Genererad av Streamlit: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}
+# 
+# Använder DocumentWeb API direkt - ingen TARGET_URL behövs!
+# API: https://documentweb.karlshamn.se/api/folders/7901f0b7-9088-472a-a8fe-7437084ad1c1
+
+# Email (SMTP)
+SMTP_HOST={env_smtp_host}
+SMTP_PORT={env_smtp_port}
+SMTP_USER={env_smtp_user}
+SMTP_PASS={env_smtp_pass}
+FROM_EMAIL={env_from_email}
+TO_EMAIL={env_to_email}
+
+# Telegram (optional)
+TELEGRAM_BOT_TOKEN={env_telegram_token}
+TELEGRAM_CHAT_ID={env_telegram_chat}
+"""
+            with open(env_path, 'w', encoding='utf-8') as f:
+                f.write(env_content)
+            
+            st.success(f"✅ .env-fil sparad: `{env_path}`")
+        except Exception as e:
+            st.error(f"❌ Kunde inte spara .env: {e}")
+    
+    st.markdown("---")
+    
+    # TASK SCHEDULER SETUP
+    st.subheader("🕐 Steg 2: Konfigurera Windows Task Scheduler")
+    
+    st.markdown("""
+    **Automatisk körning var 10:e minut:**
+    
+    1. **Öppna Task Scheduler:**
+       - Tryck `Win + R`, skriv `taskschd.msc`, tryck Enter
+    
+    2. **Skapa ny task:**
+       - Högerklicka "Task Scheduler Library" → "Create Basic Task"
+       - Namn: `Karlshamn Monitor`
+       - Beskrivning: `Övervakar Karlshamns kommun för nya dokument`
+    
+    3. **Trigger (när):**
+       - Välj "Daily"
+       - Start: Idag kl 00:00
+       - ✅ Kryssa i "Repeat task every: 10 minutes"
+       - Duration: "Indefinitely"
+    
+    4. **Action (vad):**
+       - Välj "Start a program"
+       - Kopiera kommandot nedan 👇
+    """)
+    
+    # Generera kommando - ANVÄNDER API-VERSION (namnbytt till karlshamn_alerter.py)
+    venv_python = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".venv", "Scripts", "python.exe"))
+    script_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "karlshamn_alerter.py"))
+    working_dir = os.path.dirname(script_path)
+    
+    st.markdown("**Program/script:**")
+    st.code(venv_python, language="text")
+    
+    st.markdown("**Arguments:**")
+    st.code(f'"{script_path}" --watch --interval 600', language="text")
+    
+    st.markdown("**Start in (arbetskatalog):**")
+    st.code(working_dir, language="text")
+    
+    st.info("""
+    💡 **Tips:**
+    - `--watch` = Kör kontinuerligt
+    - `--interval 600` = Kolla var 10:e minut (600 sekunder)
+    - Ändra intervall efter behov (300 = 5 min, 1800 = 30 min)
+    """)
+    
+    st.markdown("---")
+    
+    # TEST CLI
+    st.subheader("🧪 Steg 3: Testa CLI-versionen")
+    
+    st.markdown("**Kör en test innan du sätter upp Task Scheduler:**")
+    
+    test_command = f'"{venv_python}" "{script_path}" --debug'
+    
+    st.code(test_command, language="powershell")
+    
+    col1, col2 = st.columns([3, 1])
+    with col1:
+        st.markdown("Detta kör **en** kontroll och visar debug-information")
+    with col2:
+        if st.button("📋 Kopiera kommando", use_container_width=True):
+            st.code(test_command, language="text")
+            st.caption("↑ Kopiera och kör i PowerShell")
+    
+    st.markdown("---")
+    
+    # VERIFY SETUP
+    st.subheader("✅ Steg 4: Verifiera att allt fungerar")
+    
+    st.markdown("""
+    **Checklista:**
+    
+    1. ✅ `.env`-fil skapad med alla inställningar
+    2. ✅ CLI-test körs utan fel (`--debug`)
+    3. ✅ Email kommer fram (kolla skräppost första gången)
+    4. ✅ Task Scheduler-task skapad
+    5. ✅ Task körs var 10:e minut
+    6. ✅ Historik syns i Tab 2 här i Streamlit
+    
+    **Felsökning:**
+    - Inget email? → Kolla Gmail app-lösenord, kolla skräppost
+    - Task körs inte? → Kolla Task Scheduler History (högerpanel)
+    - Telegram funkar inte? → Kolla bot token och chat ID
+    - Dubbletter? → Båda systemen använder samma databas, inga dubbletter!
+    """)
+    
+    st.success("""
+    🎉 **När allt är uppsatt:**
+    - CLI körs automatiskt i bakgrunden var 10:e minut
+    - Du får email när nya dokument hittas
+    - Öppna Streamlit när du vill se historik eller göra manuella kontroller
+    - Inga dubbletter - samma databas används överallt!
+    """)
+
+# Footer
+st.markdown("---")
+st.markdown("💡 **Tips:** Lägg till nyckelord för att filtrera resultat, t.ex: 'protokoll, beslut'")</pre>
+            </div>
+        </div>
+        
+        <div class="back-button-container">
             <a href="index.html" class="back-button">Tillbaka till CV</a>
         </div>
     </div>
+
+    <script>
+        /**
+         * Copy code to clipboard
+         * Uses modern Clipboard API (requires HTTPS in all browsers except localhost for security)
+         * Falls back to deprecated execCommand for older browsers or non-HTTPS contexts
+         */
+        function copyCode() {
+            const codeElement = document.getElementById('pythonCode');
+            const text = codeElement.textContent;
+            
+            // Use modern Clipboard API if available (requires HTTPS except on localhost)
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    updateCopyButton(true);
+                }).catch(err => {
+                    console.error('Clipboard API failed:', err);
+                    fallbackCopy(text);
+                });
+            } else {
+                // Fallback for older browsers or non-HTTPS contexts
+                fallbackCopy(text);
+            }
+        }
+        
+        function fallbackCopy(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                const successful = document.execCommand('copy');
+                updateCopyButton(successful);
+                if (!successful) {
+                    console.error('Copy command failed');
+                }
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+                updateCopyButton(false);
+            }
+            document.body.removeChild(textArea);
+        }
+        
+        function updateCopyButton(success) {
+            const button = document.querySelector('.copy-button');
+            const originalText = button.textContent;
+            if (success) {
+                button.textContent = '✅ Kopierad!';
+            } else {
+                button.textContent = '❌ Misslyckades';
+            }
+            setTimeout(() => {
+                button.textContent = originalText;
+            }, 2000);
+        }
+    </script>
 </body>
 </html>
