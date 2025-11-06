@@ -920,14 +920,14 @@ st.markdown("💡 **Tips:** Lägg till nyckelord för att filtrera resultat, t.e
     <script>
         /**
          * Copy code to clipboard
-         * Uses modern Clipboard API (requires HTTPS in most browsers)
-         * Falls back to deprecated execCommand for older browsers
+         * Uses modern Clipboard API (requires HTTPS in all browsers except localhost for security)
+         * Falls back to deprecated execCommand for older browsers or non-HTTPS contexts
          */
         function copyCode() {
             const codeElement = document.getElementById('pythonCode');
             const text = codeElement.textContent;
             
-            // Use modern Clipboard API if available (requires HTTPS)
+            // Use modern Clipboard API if available (requires HTTPS except on localhost)
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
                     updateCopyButton(true);
