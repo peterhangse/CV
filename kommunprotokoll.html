@@ -75,6 +75,19 @@
             text-align: center;
             margin-top: 30px;
         }
+        .back-button {
+            display: inline-block;
+            background: var(--accent);
+            color: #fff;
+            padding: 12px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: opacity var(--transition);
+        }
+        .back-button:hover {
+            opacity: 0.9;
+        }
         @media (max-width: 720px) {
             .code-container {
                 padding: 10px;
@@ -907,13 +920,39 @@ st.markdown("💡 **Tips:** Lägg till nyckelord för att filtrera resultat, t.e
     <script>
         function copyCode() {
             const codeElement = document.getElementById('pythonCode');
+            const text = codeElement.textContent;
+            
+            // Use modern Clipboard API if available
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(text).then(() => {
+                    updateCopyButton();
+                }).catch(err => {
+                    console.error('Failed to copy:', err);
+                    fallbackCopy(text);
+                });
+            } else {
+                // Fallback for older browsers
+                fallbackCopy(text);
+            }
+        }
+        
+        function fallbackCopy(text) {
             const textArea = document.createElement('textarea');
-            textArea.value = codeElement.textContent;
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
             document.body.appendChild(textArea);
             textArea.select();
-            document.execCommand('copy');
+            try {
+                document.execCommand('copy');
+                updateCopyButton();
+            } catch (err) {
+                console.error('Fallback copy failed:', err);
+            }
             document.body.removeChild(textArea);
-            
+        }
+        
+        function updateCopyButton() {
             const button = document.querySelector('.copy-button');
             const originalText = button.textContent;
             button.textContent = '✅ Kopierad!';
