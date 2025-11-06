@@ -918,20 +918,25 @@ st.markdown("💡 **Tips:** Lägg till nyckelord för att filtrera resultat, t.e
     </div>
 
     <script>
+        /**
+         * Copy code to clipboard
+         * Uses modern Clipboard API (requires HTTPS in most browsers)
+         * Falls back to deprecated execCommand for older browsers
+         */
         function copyCode() {
             const codeElement = document.getElementById('pythonCode');
             const text = codeElement.textContent;
             
-            // Use modern Clipboard API if available
+            // Use modern Clipboard API if available (requires HTTPS)
             if (navigator.clipboard && navigator.clipboard.writeText) {
                 navigator.clipboard.writeText(text).then(() => {
-                    updateCopyButton();
+                    updateCopyButton(true);
                 }).catch(err => {
-                    console.error('Failed to copy:', err);
+                    console.error('Clipboard API failed:', err);
                     fallbackCopy(text);
                 });
             } else {
-                // Fallback for older browsers
+                // Fallback for older browsers or non-HTTPS contexts
                 fallbackCopy(text);
             }
         }
@@ -944,18 +949,26 @@ st.markdown("💡 **Tips:** Lägg till nyckelord för att filtrera resultat, t.e
             document.body.appendChild(textArea);
             textArea.select();
             try {
-                document.execCommand('copy');
-                updateCopyButton();
+                const successful = document.execCommand('copy');
+                updateCopyButton(successful);
+                if (!successful) {
+                    console.error('Copy command failed');
+                }
             } catch (err) {
                 console.error('Fallback copy failed:', err);
+                updateCopyButton(false);
             }
             document.body.removeChild(textArea);
         }
         
-        function updateCopyButton() {
+        function updateCopyButton(success) {
             const button = document.querySelector('.copy-button');
             const originalText = button.textContent;
-            button.textContent = '✅ Kopierad!';
+            if (success) {
+                button.textContent = '✅ Kopierad!';
+            } else {
+                button.textContent = '❌ Misslyckades';
+            }
             setTimeout(() => {
                 button.textContent = originalText;
             }, 2000);
