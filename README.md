@@ -1,12 +1,20 @@
-# CV - Peter Hang
+# CV — peterhang.se
 
-Interaktiv CV-webbplats för Peter Hang, lokalreporter och journalist.
+Personal CV and portfolio website for Peter Hang, journalist and reporter based in Sweden.
 
-## Funktioner
-- Responsiv design med svensk text
-- Drag & drop för att ändra ordning på sektioner
-- Kontaktformulär med FormSubmit.co
-- Kompakt och ren kod
+## Live Site
+[→ peterhang.se](https://www.peterhang.se)
 
-## Användning
-Öppna `index.html` i en webbläsare för att se CV:t. Dra i sektioner för att ändra ordning.
+## Features
+- Responsive single-page layout
+- Drag & drop section reordering
+- Projects showcase page with live app previews
+- Contact form via FormSubmit
+- Custom domain via GitHub Pages
+
+## Tech Stack
+- HTML / CSS / JavaScript
+- GitHub Pages (hosting)
+
+## Projects Page
+Browse all deployed apps at [peterhang.se/projects](https://www.peterhang.se/projects/index.html) — includes screenshots and live links.
