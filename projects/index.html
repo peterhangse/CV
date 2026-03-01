@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projekt — Peter Hang</title>
+    <style>
+        /* ── Variables matching CV site ── */
+        :root {
+            --bg: #f5f6fb;
+            --card: #fff;
+            --primary: #2c3e50;
+            --accent: #667eea;
+            --accent-dark: #5a6fd6;
+            --muted: #6b7280;
+            --radius: 12px;
+            --shadow: 0 6px 18px rgba(0,0,0,.08);
+            --transition: .25s;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg);
+            color: var(--primary);
+            font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        /* ── Back link ── */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--accent);
+            text-decoration: none;
+            font-size: 0.95em;
+            font-weight: 500;
+            margin-bottom: 8px;
+            transition: opacity var(--transition);
+        }
+        .back-link:hover { opacity: 0.7; }
+        .back-link svg { width: 16px; height: 16px; }
+
+        /* ── Page header ── */
+        .projects-header {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px 24px 0;
+            text-align: center;
+        }
+        .projects-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
+        .projects-header p {
+            color: var(--muted);
+            font-size: 1.1rem;
+            max-width: 520px;
+            margin: 0 auto;
+        }
+
+        /* ── Grid ── */
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 32px 24px 48px;
+        }
+
+        @media (max-width: 960px) {
+            .projects-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 580px) {
+            .projects-grid { grid-template-columns: 1fr; }
+            .projects-header h1 { font-size: 1.6rem; }
+        }
+
+        /* ── Card ── */
+        .card {
+            background: var(--card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: transform var(--transition), box-shadow var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 14px 36px rgba(0,0,0,.12);
+        }
+
+        /* ── Media area ── */
+        .card-media {
+            position: relative;
+            aspect-ratio: 16 / 9;
+            overflow: hidden;
+            background: #e8e8ec;
+        }
+        .card-thumbnail {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* ── Card body ── */
+        .card-body {
+            padding: 18px 20px 20px;
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        .card-name {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 6px;
+        }
+        .card-desc {
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            margin-bottom: 14px;
+            flex: 1;
+        }
+
+        /* ── Stack pills ── */
+        .card-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 14px;
+        }
+        .stack-pill {
+            background: var(--accent);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 3px 10px;
+            border-radius: 999px;
+            letter-spacing: 0.02em;
+        }
+
+        /* ── Card footer row ── */
+        .card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-top: 1px solid #f0f0f4;
+            padding-top: 12px;
+        }
+        .card-updated {
+            color: var(--muted);
+            font-size: 0.8rem;
+        }
+        .card-link {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 8px;
+            color: var(--accent);
+            transition: background var(--transition), color var(--transition);
+            text-decoration: none;
+        }
+        .card-link:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+        .card-link svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        /* ── Status badge (for non-live apps) ── */
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.55);
+            color: #fff;
+            font-size: 0.65rem;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            padding: 3px 9px;
+            border-radius: 4px;
+            text-transform: uppercase;
+            pointer-events: none;
+        }
+
+        /* ── Footer ── */
+        .page-footer {
+            text-align: center;
+            color: var(--muted);
+            font-size: 0.9em;
+            padding: 0 24px 32px;
+        }
+        .page-footer a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        .page-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="projects-header">
+        <a href="../index.html" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+            Tillbaka till CV
+        </a>
+        <h1>Mina projekt</h1>
+        <p>Ett urval appar och verktyg jag har byggt — från spel till AI-drivna granskningsverktyg.</p>
+    </div>
+
+    <div class="projects-grid" id="projects-grid">
+        <!-- Cards injected by JS -->
+    </div>
+
+    <div class="page-footer">
+        <p>&copy; 2025 Peter Hang · <a href="../index.html">Tillbaka till CV</a></p>
+    </div>
+
+<script>
+// ── Project data ──
+const projects = [
+    {
+        id: "press-or-perish",
+        name: "Press or Perish",
+        description: "Journalistsimulering i roguelike-format. 1970-talets Sverige, pixelgrafik och svåra etiska val på en liten lokaltidning.",
+        stack: ["JavaScript", "HTML/CSS", "Firebase"],
+        thumbnail: "assets/thumbnails/press-or-perish.jpg",
+        liveUrl: "https://press-or-perish.web.app",
+        githubRepo: "peterhangse/press-or-perish"
+    },
+    {
+        id: "cold-zero",
+        name: "Cold Zero",
+        description: "Precisionsskyttespel i webbläsaren med realistisk ballistiksimulering. Justera sikte, läs vinden, ta skottet.",
+        stack: ["JavaScript", "PWA", "Firebase"],
+        thumbnail: "assets/thumbnails/cold-zero.jpg",
+        liveUrl: "https://cold-zero-game.web.app",
+        githubRepo: null
+    },
+    {
+        id: "simaja",
+        name: "Simaja",
+        description: "Companion-app för The Sims-spelare. Håll koll på dina Sims, världar, familjeträd och dagboksinlägg.",
+        stack: ["Vue 3", "Tailwind", "Firebase", "Pinia"],
+        thumbnail: "assets/thumbnails/simaja.jpg",
+        liveUrl: "https://simaja.web.app",
+        githubRepo: "peterhangse/Simaja"
+    },
+    {
+        id: "tidningssimulator",
+        name: "Tidningssimulator",
+        description: "Interaktiv förstasidebyggare för skolworkshops. Elever drar och släpper artiklar för att bygga en tidningsettan.",
+        stack: ["Python", "Flask", "Docker"],
+        thumbnail: "assets/thumbnails/tidningssimulator.jpg",
+        liveUrl: null,
+        githubRepo: "peterhangse/tidningssimulator",
+        status: "Demo"
+    },
+    {
+        id: "kommungranskaren",
+        name: "Kommungranskaren",
+        description: "AI-drivet granskningsverktyg för kommunal ekonomi. Analyserar transaktioner, hittar röda flaggor och genererar offentlighetsbegäranden.",
+        stack: ["Python", "Streamlit", "Claude API"],
+        thumbnail: "assets/thumbnails/kommungranskaren.jpg",
+        liveUrl: null,
+        githubRepo: null,
+        status: "Intern"
+    },
+    {
+        id: "kommunkoll",
+        name: "Kommunkoll",
+        description: "Bevakar och samlar kommunala protokoll från flera Blekingekommuner. E-postprenumeration och automatisk skrapning.",
+        stack: ["Python", "Streamlit", "Cloud Run"],
+        thumbnail: "assets/thumbnails/kommunkoll.jpg",
+        liveUrl: null,
+        githubRepo: null,
+        status: "Intern"
+    },
+    {
+        id: "logopedia",
+        name: "Logopedia Rush",
+        description: "Tidshanteringsspel för logopedkliniker. Patienter anländer, du tilldelar övningar och jagar poäng mot klockan.",
+        stack: ["JavaScript", "HTML/CSS"],
+        thumbnail: "assets/thumbnails/logopedia.jpg",
+        liveUrl: null,
+        githubRepo: null,
+        status: "Prototyp"
+    }
+];
+
+// ── GitHub API ──
+async function fetchLastUpdated(repo) {
+    if (!repo) return null;
+    try {
+        const res = await fetch(`https://api.github.com/repos/${repo}`);
+        if (!res.ok) return null;
+        const data = await res.json();
+        return data.pushed_at;
+    } catch {
+        return null;
+    }
+}
+
+function timeAgo(dateString) {
+    if (!dateString) return null;
+    const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
+    const intervals = [
+        [31536000, "år"],
+        [2592000, "månad", "månader"],
+        [604800, "vecka", "veckor"],
+        [86400, "dag", "dagar"],
+        [3600, "timme", "timmar"],
+        [60, "minut", "minuter"]
+    ];
+    for (const [secs, singular, plural] of intervals) {
+        const count = Math.floor(seconds / secs);
+        if (count >= 1) {
+            const label = count === 1 ? singular : (plural || singular);
+            return `Uppdaterad ${count} ${label} sedan`;
+        }
+    }
+    return "Uppdaterad nyss";
+}
+
+// ── Arrow icon SVG ──
+const arrowSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>`;
+
+// ── Render ──
+async function renderProjects() {
+    const grid = document.getElementById('projects-grid');
+
+    // Fetch GitHub timestamps concurrently
+    const timestamps = await Promise.all(
+        projects.map(p => fetchLastUpdated(p.githubRepo))
+    );
+
+    projects.forEach((project, i) => {
+        const card = document.createElement('div');
+        card.className = 'card';
+
+        const updatedText = timeAgo(timestamps[i]);
+
+        card.innerHTML = `
+            <div class="card-media">
+                <img 
+                    src="${project.thumbnail}" 
+                    alt="${project.name}" 
+                    class="card-thumbnail"
+                    loading="lazy"
+                />
+                ${project.status ? `<span class="status-badge">${project.status}</span>` : ''}
+            </div>
+            <div class="card-body">
+                <div class="card-name">${project.name}</div>
+                <div class="card-desc">${project.description}</div>
+                <div class="card-stack">
+                    ${project.stack.map(s => `<span class="stack-pill">${s}</span>`).join('')}
+                </div>
+                <div class="card-footer">
+                    <span class="card-updated">${updatedText || ''}</span>
+                    ${project.liveUrl
+                        ? `<a href="${project.liveUrl}" target="_blank" rel="noopener" class="card-link" title="Öppna appen">${arrowSvg}</a>`
+                        : '<span></span>'
+                    }
+                </div>
+            </div>
+        `;
+
+        grid.appendChild(card);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', renderProjects);
+</script>
+
+</body>
+</html>
