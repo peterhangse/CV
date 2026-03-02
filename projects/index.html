@@ -90,6 +90,9 @@
             transition: transform var(--transition), box-shadow var(--transition);
             display: flex;
             flex-direction: column;
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
         }
         .card:hover {
             transform: translateY(-5px);
@@ -347,9 +350,14 @@ function renderProjects() {
 
     // 1. Render all cards immediately — no waiting for API
     projects.forEach((project) => {
-        const card = document.createElement('div');
+        const card = document.createElement(project.liveUrl ? 'a' : 'div');
         card.className = 'card';
         card.id = `card-${project.id}`;
+        if (project.liveUrl) {
+            card.href = project.liveUrl;
+            card.target = '_blank';
+            card.rel = 'noopener';
+        }
 
         card.innerHTML = `
             <div class="card-media">
