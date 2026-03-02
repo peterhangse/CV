@@ -17,4 +17,4 @@ Personal CV and portfolio website for Peter Hang, journalist and reporter based 
 - GitHub Pages (hosting)
 
 ## Projects Page
-Browse all deployed apps at [peterhang.se/projects](https://www.peterhang.se/projects/index.html) — includes screenshots and live links.
+Browse all deployed apps at [peterhang.se/projects](https://www.peterhang.se/projects/) — includes screenshots and live links.
