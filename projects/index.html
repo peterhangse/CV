@@ -341,20 +341,15 @@ function timeAgo(dateString) {
 // ── Arrow icon SVG ──
 const arrowSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17L17 7"/><path d="M7 7h10v10"/></svg>`;
 
-// ── Render ──
-async function renderProjects() {
+// ── Render instantly, hydrate timestamps in background ──
+function renderProjects() {
     const grid = document.getElementById('projects-grid');
 
-    // Fetch GitHub timestamps concurrently
-    const timestamps = await Promise.all(
-        projects.map(p => fetchLastUpdated(p.githubRepo))
-    );
-
-    projects.forEach((project, i) => {
+    // 1. Render all cards immediately — no waiting for API
+    projects.forEach((project) => {
         const card = document.createElement('div');
         card.className = 'card';
-
-        const updatedText = timeAgo(timestamps[i]);
+        card.id = `card-${project.id}`;
 
         card.innerHTML = `
             <div class="card-media">
@@ -373,7 +368,7 @@ async function renderProjects() {
                     ${project.stack.map(s => `<span class="stack-pill">${s}</span>`).join('')}
                 </div>
                 <div class="card-footer">
-                    <span class="card-updated">${updatedText || ''}</span>
+                    <span class="card-updated" id="updated-${project.id}"></span>
                     ${project.liveUrl
                         ? `<a href="${project.liveUrl}" target="_blank" rel="noopener" class="card-link" title="Öppna appen">${arrowSvg}</a>`
                         : '<span></span>'
@@ -383,6 +378,18 @@ async function renderProjects() {
         `;
 
         grid.appendChild(card);
+    });
+
+    // 2. Hydrate timestamps in background (fire-and-forget)
+    projects.forEach((project) => {
+        if (!project.githubRepo) return;
+        fetchLastUpdated(project.githubRepo).then((pushed_at) => {
+            const text = timeAgo(pushed_at);
+            if (text) {
+                const el = document.getElementById(`updated-${project.id}`);
+                if (el) el.textContent = text;
+            }
+        });
     });
 }
 
