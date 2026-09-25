@@ -81,3 +81,13 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     }
   });
 });
+
+// Kontaktformuläret: adressen sätts i runtime ur kodade delar, så
+// e-postskördande bottar inte hittar den i sidkällan. _gotcha-fältet
+// (dolt för människor) stoppar enkla spam-bottar som fyller i allt.
+(function () {
+  const form = document.getElementById('contactForm');
+  if (!form) return;
+  const delar = ['peter', 'douglas', 'hang'].join('') + '@' + ['gmail'].join('') + '.com';
+  form.action = 'https://formsubmit.co/' + delar;
+})();
