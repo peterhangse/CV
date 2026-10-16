@@ -30,9 +30,9 @@ CNAME                 — www.peterhang.se
 - Sektioner: Om mig, Erfarenhet (Sjöbo kommun / BLT / Gota Media / SVT Morgonstudion),
   Publicerade artiklar (externa länkar), Kompetenser, Egenutvecklat + "Se alla
   mina projekt".
-- `projects/index.html`: 7 kort (Press or Perish, Cold Zero, Simaja,
-  Tidningssimulator, Kommungranskaren [Intern], Kommunkoll [Intern], Logopedia
-  Rush [Prototyp]) med "Uppdaterad X sedan" hämtat klient-side från
+- `projects/index.html`: 7 kort i ordningen Tidningssimulator, Kommungranskaren
+  [Intern], Kommunkoll [Intern], Press or Perish, Simaja, Cold Zero, Logopedia
+  Rush [Prototyp] (verktyg först, spelen sist i kvalitetsordning) med "Uppdaterad X sedan" hämtat klient-side från
   `api.github.com/repos/{repo}` — applikationen har inga nycklar.
 - Kontaktformulär → **FormSubmit** (`formsubmit.co/...`), redirect till
   `thanks.html`. Inga DB-uppgifter.

@@ -240,37 +240,10 @@
 // ── Project data ──
 const projects = [
     {
-        id: "press-or-perish",
-        name: "Press or Perish",
-        description: "Journalistsimulering i roguelike-format. 1970-talets Sverige, pixelgrafik och svåra etiska val på en liten lokaltidning.",
-        stack: ["JavaScript", "HTML/CSS", "Firebase"],
-        thumbnail: "assets/thumbnails/press-or-perish.jpg",
-        liveUrl: "https://press-or-perish.web.app",
-        githubRepo: "peterhangse/press-or-perish"
-    },
-    {
-        id: "cold-zero",
-        name: "Cold Zero",
-        description: "Precisionsskyttespel i webbläsaren med realistisk ballistiksimulering. Justera sikte, läs vinden, ta skottet.",
-        stack: ["JavaScript", "PWA", "Firebase"],
-        thumbnail: "assets/thumbnails/cold-zero.jpg",
-        liveUrl: "https://cold-zero-game.web.app",
-        githubRepo: null
-    },
-    {
-        id: "simaja",
-        name: "Simaja",
-        description: "Companion-app för The Sims-spelare. Håll koll på dina Sims, världar, familjeträd och dagboksinlägg.",
-        stack: ["Vue 3", "Tailwind", "Firebase", "Pinia"],
-        thumbnail: "assets/thumbnails/simaja.jpg",
-        liveUrl: "https://simaja.web.app",
-        githubRepo: "peterhangse/Simaja"
-    },
-    {
         id: "tidningssimulator",
         name: "Tidningssimulator",
         description: "Interaktiv förstasidebyggare för skolworkshops. Elever drar och släpper artiklar för att bygga en tidningsettan.",
-        stack: ["Python", "Flask", "Docker"],
+        stack: ["Python", "Flask", "Firebase"],
         thumbnail: "assets/thumbnails/tidningssimulator.jpg",
         liveUrl: "https://tidningssimulator.web.app",
         githubRepo: "peterhangse/tidningssimulator"
@@ -296,13 +269,40 @@ const projects = [
         status: "Intern"
     },
     {
+        id: "press-or-perish",
+        name: "Press or Perish",
+        description: "Journalistsimulering i roguelike-format. 1970-talets Sverige, pixelgrafik och svåra etiska val på en liten lokaltidning.",
+        stack: ["JavaScript", "HTML/CSS", "Firebase"],
+        thumbnail: "assets/thumbnails/press-or-perish.jpg",
+        liveUrl: "https://press-or-perish.web.app",
+        githubRepo: "peterhangse/press-or-perish"
+    },
+    {
+        id: "simaja",
+        name: "Simaja",
+        description: "Companion-app för The Sims-spelare. Håll koll på dina Sims, världar, familjeträd och dagboksinlägg.",
+        stack: ["Vue 3", "Tailwind", "Firebase", "Pinia"],
+        thumbnail: "assets/thumbnails/simaja.jpg",
+        liveUrl: "https://simaja.web.app",
+        githubRepo: "peterhangse/Simaja"
+    },
+    {
+        id: "cold-zero",
+        name: "Cold Zero",
+        description: "Precisionsskyttespel i webbläsaren med realistisk ballistiksimulering. Justera sikte, läs vinden, ta skottet.",
+        stack: ["JavaScript", "PWA", "Firebase"],
+        thumbnail: "assets/thumbnails/cold-zero.jpg",
+        liveUrl: "https://cold-zero-game.web.app",
+        githubRepo: null
+    },
+    {
         id: "logopedia",
         name: "Logopedia Rush",
         description: "Tidshanteringsspel för logopedkliniker. Patienter anländer, du tilldelar övningar och jagar poäng mot klockan.",
-        stack: ["JavaScript", "HTML/CSS"],
+        stack: ["JavaScript", "HTML/CSS", "Firebase"],
         thumbnail: "assets/thumbnails/logopedia.jpg",
-        liveUrl: null,
-        githubRepo: null,
+        liveUrl: "https://logopedia-rush.web.app",
+        githubRepo: "peterhangse/Logopedia",
         status: "Prototyp"
     }
 ];
