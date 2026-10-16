@@ -1,6 +1,6 @@
 # CV — peterhang.se
 
-Personal CV and portfolio website for Peter Hang, journalist and reporter based in Sweden.
+Personal CV and portfolio website for Peter Hang, communications officer at Sjöbo kommun and former journalist, based in Sweden.
 
 ## Live Site
 [→ peterhang.se](https://www.peterhang.se)

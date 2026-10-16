@@ -27,7 +27,7 @@ CNAME                 — www.peterhang.se
 
 ## Funktioner & data
 
-- Sektioner: Om mig, Erfarenhet (BLT / Gota Media / SVT Morgonstudion),
+- Sektioner: Om mig, Erfarenhet (Sjöbo kommun / BLT / Gota Media / SVT Morgonstudion),
   Publicerade artiklar (externa länkar), Kompetenser, Egenutvecklat + "Se alla
   mina projekt".
 - `projects/index.html`: 7 kort (Press or Perish, Cold Zero, Simaja,
